@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import csv
+import os
 
 """
 CÓDIGO PARA OBTENER LOS CICLOS CON ATRIBUCIONES DOCENTES PARA [INFORMÁTICA (CAT/PES)]
@@ -8,7 +9,7 @@ Máster en Profesor/a de Educación Secundaria - Carlos González Marco
 """
 
 # Variables globales
-keyword = "Informática (CAT/PES)"
+keyword = "Tecnología"
 base_url = "https://www.todofp.es"
 urls = ["/que-estudiar/grados-d/fp-grado-basico.html",
         "/que-estudiar/grados-d/grado-medio.html",
@@ -132,13 +133,20 @@ def extract_urls(p_url: str, p_keyword: str) -> list:
 
 
 if __name__ == "__main__":
+
+    answer = input(f"Introduzca especialidad (o ENTER para valor por defecto, \"{keyword}\") > ")
+    answer = keyword if answer == "" else answer
+
+    filename = keyword.replace("/", "-").strip()
+
     data = []
+
     # Recorre las URL base y añade a la lista las que presentan la palabra clave
     for url in urls:
         print(f"URL: {url}")
         data.extend(extract_urls(url, keyword))
 
-        with open(f'{keyword.replace("/", "-").strip()}.csv', mode='w', newline='', encoding='utf-8') as file:
+        with open(f'{filename}.csv', mode='w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
             writer.writerow(
                 ['Nivel', 'Familia', 'Título', 'Módulo', 'Cuerpo', 'URL'])  # Escribe las cabeceras en el CSV
@@ -148,3 +156,5 @@ if __name__ == "__main__":
                 for module in entry['module']:
                     writer.writerow(
                         [entry['level'], entry['branch'], entry['title'], module, entry['staff'], entry['url']])
+
+    print(f"Se ha generado un resultado en: \"{os.path.abspath(filename)}\"")
